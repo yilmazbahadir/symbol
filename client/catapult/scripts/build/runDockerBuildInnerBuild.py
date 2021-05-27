@@ -1,5 +1,7 @@
 import argparse
 import os
+import shutil
+import sys
 from pathlib import Path
 
 from BasicBuildManager import BasicBuildManager
@@ -9,7 +11,7 @@ from process import ProcessManager
 CONAN_NEMTECH_REMOTE = 'https://catapult.jfrog.io/artifactory/api/conan/ngl-conan'
 
 
-class LinuxEnvironment:
+class BuildEnvironment:
     def __init__(self, use_conan, process_manager, environment_manager):
         self.use_conan = use_conan
         self.dispatch_subprocess = process_manager.dispatch_subprocess
@@ -19,8 +21,9 @@ class LinuxEnvironment:
         self._prepare_directory()
         self._prepare_environment_variables()
 
-        self.dispatch_subprocess(['ccache', '-M', '30G'])
-        self.dispatch_subprocess(['ccache', '-s'])
+        if 'win32' != sys.platform:
+            self.dispatch_subprocess(['ccache', '-M', '30G'])
+            self.dispatch_subprocess(['ccache', '-s'])
 
     def _prepare_directory(self):
         self.environment_manager.mkdirs('/tmp/_build')
@@ -28,7 +31,11 @@ class LinuxEnvironment:
 
     def _prepare_environment_variables(self):
         if self.use_conan:
-            self.environment_manager.set_env_var('HOME', '/conan')  # conan cache directory
+            # conan cache directory
+            if 'win32' != sys.platform:
+                self.environment_manager.set_env_var('HOME', '/conan')
+            else:
+                self.environment_manager.set_env_var('CONAN_USER_HOME', '/conan')
         else:
             self.environment_manager.set_env_var('BOOST_ROOT', '/mybuild')
             self.environment_manager.set_env_var('GTEST_ROOT', '/usr/local')
@@ -61,9 +68,12 @@ class BuildManager(BasicBuildManager):
             ('CMAKE_BUILD_TYPE', self.build_configuration),
             ('CATAPULT_TEST_DB_URL', 'mongodb://db:27017'),
             ('CATAPULT_DOCKER_TESTS', 'ON'),
-            ('ENABLE_CODE_COVERAGE', 'OFF'),
-            ('ARCHITECTURE_NAME', self.architecture)
+            ('ENABLE_CODE_COVERAGE', 'OFF')
         ]
+
+        if 'win32' != sys.platform:
+            # ARCHITECTURE_NAME is used to set `-march`, disable on windows
+            settings.append(('ARCHITECTURE_NAME', self.architecture))
 
         if self.enable_diagnostics:
             settings.append(('ENABLE_CATAPULT_DIAGNOSTICS', 'ON'))
@@ -88,16 +98,26 @@ class BuildManager(BasicBuildManager):
 
     def run_cmake(self):
         cmake_settings = self.cmake_settings()
-        self.dispatch_subprocess(['cmake'] + cmake_settings + ['-G', 'Ninja', '/catapult-src'])
+        if 'win32' == sys.platform:
+            self.dispatch_subprocess(['cmake'] + cmake_settings + ['-G', 'Visual Studio 16 2019', '-A', 'x64', '/catapult-src'])
+        else:
+            self.dispatch_subprocess(['cmake'] + cmake_settings + ['-G', 'Ninja', '/catapult-src'])
 
     def build(self):
-        self.dispatch_subprocess(['ninja', 'publish'])
-        self.dispatch_subprocess(['ninja'])
-        self.dispatch_subprocess(['ninja', 'install'])
+        if 'win32' == sys.platform:
+            self.dispatch_subprocess(['cmake', '--build', '.', '--target', 'publish'])
+            self.dispatch_subprocess(['msbuild', '/p:Configuration=RelWithDebInfo', '/p:Platform=x64', '/maxcpucount:8', 'ALL_BUILD.vcxproj'])
+            self.dispatch_subprocess(['cmd', '/c', 'dir'])
+            self.dispatch_subprocess(['cmd', '/c', 'dir', 'bin'])
+        else:
+            self.dispatch_subprocess(['ninja', 'publish'])
+            self.dispatch_subprocess(['ninja'])
+            self.dispatch_subprocess(['ninja', 'install'])
 
     def copy_dependencies(self, destination):
         if self.use_conan:
-            self.environment_manager.copy_tree_with_symlinks('./deps', destination)
+            if 'win32' != sys.platform:
+                self.environment_manager.copy_tree_with_symlinks('./deps', destination)
             return
 
         self.environment_manager.mkdirs(destination)
@@ -109,6 +129,9 @@ class BuildManager(BasicBuildManager):
             self.environment_manager.copy_glob_with_symlinks(system_bin_path, 'lib{}.so*'.format(name), destination)
 
     def copy_compiler_deps(self, destination):
+        if not self.compiler.deps:
+            return
+
         for dependency_pattern in self.compiler.deps:
             directory_path = os.path.dirname(dependency_pattern)
             pattern = os.path.basename(dependency_pattern)
@@ -135,6 +158,11 @@ class BuildManager(BasicBuildManager):
         if not self.is_release:
             self.environment_manager.mkdirs(tests_output_path)
             self.environment_manager.copy_glob_with_symlinks('./bin', 'tests*', tests_output_path)
+            if 'win32' == sys.platform:
+                self.environment_manager.copy_glob_with_symlinks('./bin', '*.dll', tests_output_path)
+
+        if 'win32' == sys.platform:
+            return
 
         # list directories
         self.dispatch_subprocess(['ls', '-alh', deps_output_path])
@@ -154,11 +182,15 @@ def main():
     environment_manager = EnvironmentManager(args.dry_run)
 
     builder = BuildManager(args, process_manager, environment_manager)
-    env = LinuxEnvironment(builder.use_conan, process_manager, environment_manager)
+    conan_options = {'version': builder.compiler.version, 'libcxx': builder.stl.lib}
+    if builder.is_msvc:
+        conan_options = {'version': builder.compiler.version}
+
+    env = BuildEnvironment(builder.use_conan, process_manager, environment_manager)
     env.prepare()
 
     if builder.use_conan:
-        env.prepare_conan({'version': builder.compiler.version, 'libcxx': builder.stl.lib})
+        env.prepare_conan(conan_options)
         env.run_conan_install()
 
     builder.run_cmake()

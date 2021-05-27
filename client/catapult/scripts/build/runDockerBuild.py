@@ -6,13 +6,18 @@ from BasicBuildManager import BasicBuildManager
 from environment import EnvironmentManager
 from process import ProcessManager
 
-CCACHE_ROOT = '/jenkins_cache/ccache'
-CONAN_ROOT = '/jenkins_cache/conan'
+
+def root_directory(directory_name):
+    root_directory_prefix = 'c:\\' if 'win32' == sys.platform else '/'
+    return root_directory_prefix + directory_name
+
+
+CCACHE_ROOT = root_directory('jenkins_cache/ccache')
+CONAN_ROOT = root_directory('jenkins_cache/conan')
 
 SRC_DIR = Path('catapult-src').resolve()
 OUTPUT_DIR = Path('output').resolve()
 BINARIES_DIR = OUTPUT_DIR / 'binaries'
-
 
 class OptionsManager(BasicBuildManager):
     def __init__(self, args):
@@ -50,10 +55,16 @@ class OptionsManager(BasicBuildManager):
 
     @property
     def conan_path(self):
-        return Path(CONAN_ROOT) / ('clang' if self.is_clang else 'gcc')
+        if self.is_clang:
+            return Path(CONAN_ROOT) / 'clang'
+
+        elif self.is_msvc:
+            return Path('d:/msvc')
+
+        return Path(CONAN_ROOT) / 'gcc'
 
     def docker_run_settings(self):
-        settings = [
+        settings = [] if self.is_msvc else [
             ('CC', self.compiler.c),
             ('CXX', self.compiler.cpp),
             ('CCACHE_DIR', '/ccache')
@@ -62,32 +73,41 @@ class OptionsManager(BasicBuildManager):
         return ['--env={}={}'.format(key, value) for key, value in sorted(settings)]
 
 
-def get_volume_mappings(ccache_path, conan_path):
-    mappings = [
-        (SRC_DIR, '/catapult-src'),
-        (BINARIES_DIR.resolve(), '/binaries'),
-        (conan_path, '/conan'),
-        (ccache_path, '/ccache')
-    ]
+    def get_volume_mappings(self):
+        mappings = [
+            (SRC_DIR, root_directory('catapult-src')),
+            (BINARIES_DIR.resolve(), root_directory('binaries')),
+            (self.conan_path, root_directory('conan'))
+        ]
 
-    return ['--volume={}:{}'.format(str(key), value) for key, value in sorted(mappings)]
+        if not self.is_msvc:
+            mappings.append((self.ccache_path, root_directory('ccache')))
+
+        return ['--volume={}:{}'.format(str(key), value) for key, value in sorted(mappings)]
 
 
 def create_docker_run_command(options, compiler_configuration_filepath, build_configuration_filepath, user):
     docker_run_settings = options.docker_run_settings()
-    volume_mappings = get_volume_mappings(options.ccache_path, options.conan_path)
+    volume_mappings = options.get_volume_mappings()
 
     docker_args = [
         'docker', 'run',
-        '--rm',
-        '--user={}'.format(user),
-    ] + docker_run_settings + volume_mappings + [
+        '--rm'
+    ]
+
+    if 'win32' != sys.platform:
+        docker_args.append('--user={}'.format(user))
+
+    docker_args.extend(docker_run_settings)
+    docker_args.extend(volume_mappings)
+
+    docker_args.extend([
         options.build_base_image_name,
         'python3', '/catapult-src/scripts/build/runDockerBuildInnerBuild.py',
         # assume paths are relative to workdir
         '--compiler-configuration=/{}'.format(compiler_configuration_filepath),
         '--build-configuration=/{}'.format(build_configuration_filepath)
-    ]
+    ])
 
     return docker_args
 
@@ -119,8 +139,8 @@ def prepare_docker_image(process_manager, container_id, prepare_replacements):
     process_manager.dispatch_subprocess([
         'docker', 'run',
         '--cidfile={}'.format(cid_filepath),
-        '--volume={}:/scripts'.format(SRC_DIR / 'scripts' / 'build'),
-        '--volume={}:/data'.format(OUTPUT_DIR),
+        '--volume={}:{}'.format(SRC_DIR / 'scripts' / 'build', root_directory('scripts')),
+        '--volume={}:{}'.format(OUTPUT_DIR.resolve(), root_directory('data')),
         'registry.hub.docker.com/{}'.format(prepare_replacements['base_image_name']),
         'python3', '/scripts/runDockerBuildInnerPrepare.py',
         '--disposition={}'.format(build_disposition)
@@ -151,13 +171,19 @@ def main():
         print(options.prepare_base_image_name)
         return
 
-    docker_run = create_docker_run_command(options, args.compiler_configuration, args.build_configuration, args.user)
-
     environment_manager = EnvironmentManager(args.dry_run)
     environment_manager.rmtree(OUTPUT_DIR)
     environment_manager.mkdirs(BINARIES_DIR)
     environment_manager.mkdirs(options.ccache_path / 'tmp', exist_ok=True)
     environment_manager.mkdirs(options.conan_path, exist_ok=True)
+
+    print('*** *** *** *** *** ***')
+    print('SRC_DIR:       {}'.format(SRC_DIR))
+    print('OUTPUT_DIR:    {}'.format(OUTPUT_DIR.resolve()))
+    print('BINARIES_DIR:  {}'.format(BINARIES_DIR.resolve()))
+    print('*** *** *** *** *** ***')
+
+    docker_run = create_docker_run_command(options, args.compiler_configuration, args.build_configuration, args.user)
 
     print('building project')
 

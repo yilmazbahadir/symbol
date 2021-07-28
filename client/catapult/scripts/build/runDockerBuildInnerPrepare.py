@@ -1,11 +1,18 @@
 import argparse
+import sys
 from pathlib import Path
 
 from environment import EnvironmentManager
 from process import ProcessManager
 
-DATA_VOLUME = Path('/data')
-USER_HOME = Path('/usr/catapult')
+
+def root_directory(directory_name):
+    root_directory_prefix = 'c:\\' if 'win32' == sys.platform else '/'
+    return root_directory_prefix + directory_name
+
+
+DATA_VOLUME = root_directory('data')
+USER_HOME = root_directory('/usr/catapult')
 
 
 def main():

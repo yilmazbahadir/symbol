@@ -37,6 +37,7 @@ class BuildEnvironment:
             else:
                 self.environment_manager.set_env_var('CONAN_USER_HOME', '/conan')
                 self.environment_manager.set_env_var('CONAN_USER_HOME_SHORT', 'None')
+                self.dispatch_subprocess(['REG', 'ADD', 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\FileSystem', '/v', 'LongPathsEnabled', '/t', 'REG_DWORD', '/d', '1', '/f'])
         else:
             self.environment_manager.set_env_var('BOOST_ROOT', '/mybuild')
             self.environment_manager.set_env_var('GTEST_ROOT', '/usr/local')

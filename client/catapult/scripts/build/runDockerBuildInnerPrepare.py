@@ -11,8 +11,8 @@ def root_directory(directory_name):
     return root_directory_prefix + directory_name
 
 
-DATA_VOLUME = root_directory('data')
-USER_HOME = root_directory('/usr/catapult')
+DATA_VOLUME = Path(root_directory('data')).resolve()
+USER_HOME = Path(root_directory('/usr/catapult')).resolve()
 
 
 def main():

@@ -76,7 +76,7 @@ class OptionsManager(BasicBuildManager):
     def get_volume_mappings(self):
         mappings = [
             (SRC_DIR, root_directory('catapult-src')),
-            (BINARIES_DIR.resolve(), root_directory('binaries')),
+            (BINARIES_DIR, root_directory('binaries')),
             (self.conan_path, root_directory('conan'))
         ]
 
@@ -158,6 +158,8 @@ def prepare_docker_image(process_manager, container_id, prepare_replacements):
 
 
 def main():
+    global OUTPUT_DIR, BINARIES_DIR
+
     parser = argparse.ArgumentParser(description='catapult project build generator')
     parser.add_argument('--compiler-configuration', help='path to compiler configuration yaml', required=True)
     parser.add_argument('--build-configuration', help='path to build configuration yaml', required=True)
@@ -181,10 +183,13 @@ def main():
     environment_manager.mkdirs(options.ccache_path / 'tmp', exist_ok=True)
     environment_manager.mkdirs(options.conan_path, exist_ok=True)
 
+    OUTPUT_DIR = OUTPUT_DIR.resolve()
+    BINARIES_DIR = BINARIES_DIR.resolve()
+
     print('*** *** *** *** *** ***')
     print('SRC_DIR:       {}'.format(SRC_DIR))
-    print('OUTPUT_DIR:    {}'.format(OUTPUT_DIR.resolve()))
-    print('BINARIES_DIR:  {}'.format(BINARIES_DIR.resolve()))
+    print('OUTPUT_DIR:    {}'.format(OUTPUT_DIR))
+    print('BINARIES_DIR:  {}'.format(BINARIES_DIR))
     print('*** *** *** *** *** ***')
 
     docker_run = create_docker_run_command(options, args.compiler_configuration, args.build_configuration, args.user)

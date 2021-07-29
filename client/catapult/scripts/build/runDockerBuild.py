@@ -16,7 +16,7 @@ CCACHE_ROOT = root_directory('jenkins_cache/ccache')
 CONAN_ROOT = root_directory('jenkins_cache/conan')
 
 SRC_DIR = Path('catapult-src').resolve()
-OUTPUT_DIR = Path('output').resolve()
+OUTPUT_DIR = Path('output')
 BINARIES_DIR = OUTPUT_DIR / 'binaries'
 
 class OptionsManager(BasicBuildManager):

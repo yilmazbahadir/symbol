@@ -37,6 +37,7 @@ class BuildEnvironment:
             else:
                 self.environment_manager.set_env_var('CONAN_USER_HOME', '/conan')
                 self.environment_manager.set_env_var('CONAN_USER_HOME_SHORT', 'None')
+                # probably should be in the machine image not here
                 self.dispatch_subprocess(['REG', 'ADD', 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\FileSystem', '/v', 'LongPathsEnabled', '/t', 'REG_DWORD', '/d', '1', '/f'])
         else:
             self.environment_manager.set_env_var('BOOST_ROOT', '/mybuild')
@@ -109,6 +110,7 @@ class BuildManager(BasicBuildManager):
         if 'win32' == sys.platform:
             self.dispatch_subprocess(['cmake', '--build', '.', '--target', 'publish'])
             self.dispatch_subprocess(['msbuild', '/p:Configuration=RelWithDebInfo', '/p:Platform=x64', '/maxcpucount:8', 'ALL_BUILD.vcxproj'])
+            self.dispatch_subprocess(['msbuild', '/p:Configuration=RelWithDebInfo', '/p:Platform=x64', 'INSTALL.vcxproj'])
             self.dispatch_subprocess(['cmd', '/c', 'dir'])
             self.dispatch_subprocess(['cmd', '/c', 'dir', 'bin'])
         else:

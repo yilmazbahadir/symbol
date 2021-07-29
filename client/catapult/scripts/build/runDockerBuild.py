@@ -135,6 +135,10 @@ def prepare_docker_image(process_manager, container_id, prepare_replacements):
     }
     destination_repository = disposition_to_repository_map[build_disposition]
 
+    print('*** volume paths prior to run')
+    print('SRC_DIR:       {}'.format(SRC_DIR))
+    print('OUTPUT_DIR:    {}'.format(OUTPUT_DIR.resolve()))
+
     destination_image_name = 'symbolplatform/{}:{}'.format(destination_repository, destination_image_label)
     process_manager.dispatch_subprocess([
         'docker', 'run',

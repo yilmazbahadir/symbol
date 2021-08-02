@@ -199,6 +199,9 @@ def main():
     process_manager = ProcessManager(args.dry_run)
 
     if options.is_msvc:
+        with open('d:\\msvc\\test.txt', 'w') as output_file:
+            output_file.write('1. marker inside host\n')
+
         process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc'])
         #process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc\\conan'])
         #process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc\\conan\\.conan'])

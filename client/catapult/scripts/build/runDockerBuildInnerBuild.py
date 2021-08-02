@@ -35,6 +35,10 @@ class BuildEnvironment:
             if 'win32' != sys.platform:
                 self.environment_manager.set_env_var('HOME', '/conan')
             else:
+                print('test.txt contents')
+                with open('c:\\conan\\test.txt') as input_file:
+                    print(input_file.read())
+
                 self.environment_manager.set_env_var('CONAN_USER_HOME', '/conan')
                 self.environment_manager.set_env_var('CONAN_USER_HOME_SHORT', 'None')
                 # probably should be in the machine image not here

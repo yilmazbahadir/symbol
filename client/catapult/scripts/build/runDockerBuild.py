@@ -200,8 +200,8 @@ def main():
 
     if options.is_msvc:
         process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc'])
-        process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc\\conan'])
-        process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc\\conan\\.conan'])
+        #process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc\\conan'])
+        #process_manager.dispatch_subprocess(['cmd', '/c', 'dir', 'd:\\msvc\\conan\\.conan'])
 
     return_code = process_manager.dispatch_subprocess(docker_run)
     if return_code:

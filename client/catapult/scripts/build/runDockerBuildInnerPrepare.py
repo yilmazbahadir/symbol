@@ -46,9 +46,9 @@ def main():
 
     process_manager.dispatch_subprocess(['ls', '-laF', USER_HOME])
 
-    ls_folder_names = ['bin', 'deps', 'lib']
+    ls_folder_names = bin_folder_names[:]
     if is_dev_build:
-        ls_folder_names.extend(['seed', 'scripts', 'resources', 'tests'])
+        ls_folder_names.extend(['seed', 'scripts', 'resources'])
 
     for name in ls_folder_names:
         process_manager.dispatch_subprocess(['ls', '-laF', USER_HOME / name])

@@ -38,6 +38,9 @@ class BuildEnvironment:
                 print('test.txt contents')
                 with open('c:\\conan\\test.txt') as input_file:
                     print(input_file.read())
+                
+                with open('c:\\conan\\test.txt', 'a') as output_file:
+                    output_file.write('2. marker inside build\n')
 
                 self.environment_manager.set_env_var('CONAN_USER_HOME', '/conan')
                 self.environment_manager.set_env_var('CONAN_USER_HOME_SHORT', 'None')

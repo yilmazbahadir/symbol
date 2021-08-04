@@ -210,6 +210,10 @@ def main():
     if return_code:
         sys.exit(return_code)
 
+    print('test.txt contents (host)')
+    with open('d:\\msvc\\test.txt') as input_file:
+        print(input_file.read())
+
     print('copying files')
 
     environment_manager.chdir(OUTPUT_DIR)

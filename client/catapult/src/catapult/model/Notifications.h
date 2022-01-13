@@ -42,8 +42,8 @@ namespace catapult { namespace model {
 		/// Creates a new notification with \a type and \a size.
 		Notification(NotificationType type, size_t size)
 				: Type(type)
-				, Size(size)
-		{}
+				, Size(size) {
+		}
 
 	public:
 		/// Notification type.
@@ -67,8 +67,8 @@ namespace catapult { namespace model {
 		/// Creates a notification around \a address.
 		explicit AccountAddressNotification(const ResolvableAddress& address)
 				: Notification(Notification_Type, sizeof(AccountAddressNotification))
-				, Address(address)
-		{}
+				, Address(address) {
+		}
 
 	public:
 		/// Address (resolvable).
@@ -85,8 +85,8 @@ namespace catapult { namespace model {
 		/// Creates a notification around \a publicKey.
 		explicit AccountPublicKeyNotification(const Key& publicKey)
 				: Notification(Notification_Type, sizeof(AccountPublicKeyNotification))
-				, PublicKey(publicKey)
-		{}
+				, PublicKey(publicKey) {
+		}
 
 	public:
 		/// Public key.
@@ -106,8 +106,8 @@ namespace catapult { namespace model {
 				: Notification(TDerivedNotification::Notification_Type, sizeof(TDerivedNotification))
 				, Sender(sender)
 				, MosaicId(mosaicId)
-				, Amount(amount)
-		{}
+				, Amount(amount) {
+		}
 
 	public:
 		/// Sender.
@@ -141,8 +141,8 @@ namespace catapult { namespace model {
 				AmountType transferAmountType = AmountType::Static)
 				: BasicBalanceNotification(sender, mosaicId, amount)
 				, Recipient(recipient)
-				, TransferAmountType(transferAmountType)
-		{}
+				, TransferAmountType(transferAmountType) {
+		}
 
 	public:
 		/// Recipient.
@@ -179,8 +179,8 @@ namespace catapult { namespace model {
 				, NetworkIdentifier(networkIdentifier)
 				, EntityVersion(entityVersion)
 				, MinVersion(minVersion)
-				, MaxVersion(maxVersion)
-		{}
+				, MaxVersion(maxVersion) {
+		}
 
 	public:
 		/// Network identifier.
@@ -223,8 +223,8 @@ namespace catapult { namespace model {
 				, Timestamp(timestamp)
 				, Difficulty(difficulty)
 				, FeeMultiplier(feeMultiplier)
-				, NumTransactions(0)
-		{}
+				, NumTransactions(0) {
+		}
 
 	public:
 		/// Block type.
@@ -263,8 +263,8 @@ namespace catapult { namespace model {
 		BlockTypeNotification(EntityType blockType, Height blockHeight)
 				: Notification(Notification_Type, sizeof(BlockTypeNotification))
 				, BlockType(blockType)
-				, BlockHeight(blockHeight)
-		{}
+				, BlockHeight(blockHeight) {
+		}
 
 	public:
 		/// Block type.
@@ -292,8 +292,8 @@ namespace catapult { namespace model {
 				, VotingEligibleAccountsCount(votingEligibleAccountsCount)
 				, HarvestingEligibleAccountsCount(harvestingEligibleAccountsCount)
 				, TotalVotingBalance(totalVotingBalance)
-				, PreviousImportanceBlockHash(previousImportanceBlockHash)
-		{}
+				, PreviousImportanceBlockHash(previousImportanceBlockHash) {
+		}
 
 	public:
 		/// Number of voting eligible accounts.
@@ -326,8 +326,8 @@ namespace catapult { namespace model {
 				, Sender(sender)
 				, TransactionHash(transactionHash)
 				, TransactionType(transactionType)
-				, Deadline(deadline)
-		{}
+				, Deadline(deadline) {
+		}
 
 	public:
 		/// Transaction sender.
@@ -354,8 +354,8 @@ namespace catapult { namespace model {
 		TransactionDeadlineNotification(Timestamp deadline, utils::TimeSpan maxLifetime)
 				: Notification(Notification_Type, sizeof(TransactionDeadlineNotification))
 				, Deadline(deadline)
-				, MaxLifetime(maxLifetime)
-		{}
+				, MaxLifetime(maxLifetime) {
+		}
 
 	public:
 		/// Transaction deadline.
@@ -379,8 +379,8 @@ namespace catapult { namespace model {
 				, Sender(sender)
 				, TransactionSize(transactionSize)
 				, Fee(fee)
-				, MaxFee(maxFee)
-		{}
+				, MaxFee(maxFee) {
+		}
 
 	public:
 		/// Transaction sender.
@@ -422,8 +422,8 @@ namespace catapult { namespace model {
 				, SignerPublicKey(signerPublicKey)
 				, Signature(signature)
 				, Data(data)
-				, DataReplayProtectionMode(dataReplayProtectionMode)
-		{}
+				, DataReplayProtectionMode(dataReplayProtectionMode) {
+		}
 
 	public:
 		/// Signer public key.
@@ -452,15 +452,12 @@ namespace catapult { namespace model {
 
 	public:
 		/// Creates a notification around \a source, \a transactionType and \a participantsByAddress.
-		AddressInteractionNotification(
-				const Address& source,
-				EntityType transactionType,
-				const UnresolvedAddressSet& participantsByAddress)
+		AddressInteractionNotification(const Address& source, EntityType transactionType, const UnresolvedAddressSet& participantsByAddress)
 				: Notification(Notification_Type, sizeof(AddressInteractionNotification))
 				, Source(source)
 				, TransactionType(transactionType)
-				, ParticipantsByAddress(participantsByAddress)
-		{}
+				, ParticipantsByAddress(participantsByAddress) {
+		}
 
 	public:
 		/// Source.
@@ -489,8 +486,8 @@ namespace catapult { namespace model {
 				: Notification(Notification_Type, sizeof(MosaicRequiredNotification))
 				, Owner(owner)
 				, MosaicId(mosaicId)
-				, PropertyFlagMask(propertyFlagMask)
-		{}
+				, PropertyFlagMask(propertyFlagMask) {
+		}
 
 	public:
 		/// Mosaic owner (resolvable).
@@ -528,8 +525,8 @@ namespace catapult { namespace model {
 				, PrimaryChangeType(primaryChangeType)
 				, PrimaryId(primaryId)
 				, SecondaryChangeType(secondaryChangeType)
-				, SecondaryId(secondaryId)
-		{}
+				, SecondaryId(secondaryId) {
+		}
 
 	public:
 		/// Type of primary source change.
@@ -559,8 +556,8 @@ namespace catapult { namespace model {
 		/// Creates a notification around \a padding.
 		explicit InternalPaddingNotification(uint64_t padding)
 				: Notification(Notification_Type, sizeof(InternalPaddingNotification))
-				, Padding(padding)
-		{}
+				, Padding(padding) {
+		}
 
 	public:
 		/// Padding data.
@@ -581,8 +578,8 @@ namespace catapult { namespace model {
 		/// Creates a notification around \a linkAction.
 		explicit KeyLinkActionNotification(model::LinkAction linkAction)
 				: Notification(Notification_Type, sizeof(KeyLinkActionNotification))
-				, LinkAction(linkAction)
-		{}
+				, LinkAction(linkAction) {
+		}
 
 	public:
 		/// Link action.
@@ -602,8 +599,8 @@ namespace catapult { namespace model {
 				: Notification(Notification_Type, sizeof(BasicKeyLinkNotification))
 				, MainAccountPublicKey(mainAccountPublicKey)
 				, LinkedPublicKey(linkedPublicKey)
-				, LinkAction(linkAction)
-		{}
+				, LinkAction(linkAction) {
+		}
 
 	public:
 		/// Main account public key.

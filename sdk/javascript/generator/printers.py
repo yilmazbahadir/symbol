@@ -69,8 +69,8 @@ class TypedArrayPrinter(Printer):
 	def get_size(self):
 		if self.is_variable_size:
 			alignment = self.descriptor.field_type.alignment
-			exclude_last = js_bool(not self.descriptor.field_type.is_last_element_padded)
-			return f'arrayHelpers.size(this.{self.name}, {alignment}, {exclude_last})'
+			skip_last_element_padding = js_bool(not self.descriptor.field_type.is_last_element_padded)
+			return f'arrayHelpers.size(this.{self.name}, {alignment}, {skip_last_element_padding})'
 
 		return f'arrayHelpers.size(this.{self.name})'
 
@@ -91,8 +91,8 @@ class TypedArrayPrinter(Printer):
 				buffer_view = f'view.window({data_size})'
 
 			alignment = self.descriptor.field_type.alignment
-			exclude_last = js_bool(not self.descriptor.field_type.is_last_element_padded)
-			return f'arrayHelpers.readVariableSizeElements({buffer_view}, {element_type}, {alignment}, {exclude_last})'
+			skip_last_element_padding = js_bool(not self.descriptor.field_type.is_last_element_padded)
+			return f'arrayHelpers.readVariableSizeElements({buffer_view}, {element_type}, {alignment}, {skip_last_element_padding})'
 
 		if self.descriptor.field_type.is_expandable:
 			return f'arrayHelpers.readArray(view.buffer, {element_type})'
@@ -115,16 +115,16 @@ class TypedArrayPrinter(Printer):
 
 		alignment = self.descriptor.field_type.alignment
 		if alignment:
-			exclude_last = js_bool(not self.descriptor.field_type.is_last_element_padded)
-			return f'arrayHelpers.size({self.name}, {alignment}, {exclude_last})'
+			skip_last_element_padding = js_bool(not self.descriptor.field_type.is_last_element_padded)
+			return f'arrayHelpers.size({self.name}, {alignment}, {skip_last_element_padding})'
 
 		return f'arrayHelpers.size({self.name})'
 
 	def store(self, field_name, buffer_name):
 		if self.is_variable_size:
 			alignment = self.descriptor.field_type.alignment
-			exclude_last = js_bool(not self.descriptor.field_type.is_last_element_padded)
-			return f'arrayHelpers.writeVariableSizeElements({buffer_name}, {field_name}, {alignment}, {exclude_last})'
+			skip_last_element_padding = js_bool(not self.descriptor.field_type.is_last_element_padded)
+			return f'arrayHelpers.writeVariableSizeElements({buffer_name}, {field_name}, {alignment}, {skip_last_element_padding})'
 
 		if self.descriptor.field_type.is_expandable:
 			return f'arrayHelpers.writeArray({buffer_name}, {field_name})'

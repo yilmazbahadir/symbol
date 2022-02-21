@@ -66,8 +66,8 @@ class TypedArrayPrinter(Printer):
 	def get_size(self):
 		if self.is_variable_size:
 			alignment = self.descriptor.field_type.alignment
-			exclude_last = not self.descriptor.field_type.is_last_element_padded
-			return f'ArrayHelpers.size(self.{self.name}, {alignment}, exclude_last={exclude_last})'
+			skip_last_element_padding = not self.descriptor.field_type.is_last_element_padded
+			return f'ArrayHelpers.size(self.{self.name}, {alignment}, skip_last_element_padding={skip_last_element_padding})'
 
 		return f'ArrayHelpers.size(self.{self.name})'
 
@@ -84,8 +84,8 @@ class TypedArrayPrinter(Printer):
 				buffer = 'buffer'
 
 			alignment = self.descriptor.field_type.alignment
-			exclude_last = not self.descriptor.field_type.is_last_element_padded
-			return f'ArrayHelpers.read_variable_size_elements({buffer}, {element_type}, {alignment}, exclude_last={exclude_last})'
+			skip_last_element_padding = f'skip_last_element_padding={not self.descriptor.field_type.is_last_element_padded}'
+			return f'ArrayHelpers.read_variable_size_elements({buffer}, {element_type}, {alignment}, {skip_last_element_padding})'
 
 		if self.descriptor.field_type.is_expandable:
 			return f'ArrayHelpers.read_array(buffer, {element_type})'
@@ -108,15 +108,15 @@ class TypedArrayPrinter(Printer):
 
 		alignment = self.descriptor.field_type.alignment
 		if alignment:
-			return f'ArrayHelpers.size({self.name}, {alignment}, exclude_last={not self.descriptor.field_type.is_last_element_padded})'
+			return f'ArrayHelpers.size({self.name}, {alignment}, skip_last_element_padding={not self.descriptor.field_type.is_last_element_padded})'
 
 		return f'ArrayHelpers.size({self.name})'
 
 	def store(self, field_name):
 		if self.is_variable_size:
-			exclude_last = not self.descriptor.field_type.is_last_element_padded
 			alignment = self.descriptor.field_type.alignment
-			return f'ArrayHelpers.write_variable_size_elements({field_name}, {alignment}, exclude_last={exclude_last})'
+			skip_last_element_padding = not self.descriptor.field_type.is_last_element_padded
+			return f'ArrayHelpers.write_variable_size_elements({field_name}, {alignment}, skip_last_element_padding={skip_last_element_padding})'
 
 		if self.descriptor.field_type.is_expandable:
 			return f'ArrayHelpers.write_array({field_name})'

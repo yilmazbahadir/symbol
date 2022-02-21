@@ -16,12 +16,7 @@ describe('arrayHelpers', () => {
 
 	class ElementsTestContext {
 		constructor(sizes = undefined) {
-			const elementSizes = sizes || [];
-			if (!sizes) {
-				for (let i = 0; 5 > i; ++i)
-					elementSizes.push((i * 3) + 1);
-			}
-
+			const elementSizes = sizes || Array.from({ length: 5 }, (_, index) => (index * 3) + 1);
 			this.elements = elementSizes.map(size => new MockElement(size));
 
 			this.output = {
@@ -63,12 +58,12 @@ describe('arrayHelpers', () => {
 	// region size
 
 	describe('size', () => {
-		const assertSize = (sizes, expectedSize, alignment = 0, excludeLast = false) => {
+		const assertSize = (sizes, expectedSize, alignment = 0, skipLastElementPadding = false) => {
 			// Arrange:
 			const context = new ElementsTestContext(sizes);
 
 			// Act:
-			const elementsSize = arrayHelpers.size(context.elements, alignment, excludeLast);
+			const elementsSize = arrayHelpers.size(context.elements, alignment, skipLastElementPadding);
 
 			// Assert:
 			expect(elementsSize).to.equal(expectedSize);
@@ -217,9 +212,9 @@ describe('arrayHelpers', () => {
 			expect(elements).to.deep.equal(expectedElements);
 		});
 
-		it('throws when reading would result in OOB read', () => {
-			// Arrange:
-			const context = new ReadTestContext([24, 25], 49);
+		it('cannot read at buffer end when last read results in OOB', () => {
+			// Arrange: aligned sizes: 24, 28
+			const context = new ReadTestContext([23, 25], 49);
 
 			// Sanity: use same context, but readArray
 			{
@@ -233,11 +228,11 @@ describe('arrayHelpers', () => {
 				.to.throw('unexpected buffer length');
 		});
 
-		it('excluding last element reads at buffer end', () => {
-			// Arrange:
-			const context = new ReadTestContext([24, 25], 49);
+		it('can read at buffer end when last element padding is skipped', () => {
+			// Arrange: aligned sizes: 24, 25
+			const context = new ReadTestContext([23, 25], 49);
 			const expectedElements = [
-				{ size: 24, tag: 15 },
+				{ size: 23, tag: 15 },
 				{ size: 25, tag: 15 + 24 }
 			];
 
@@ -248,9 +243,9 @@ describe('arrayHelpers', () => {
 			expect(elements).to.deep.equal(expectedElements);
 		});
 
-		it('excluding last element throws when reading would result in OOB read', () => {
-			// Arrange:
-			const context = new ReadTestContext([24, 25], 48);
+		it('cannot read at buffer end when last element padding is skipped and last read results in OOB', () => {
+			// Arrange: aligned sizes: 24, 25
+			const context = new ReadTestContext([23, 25], 48);
 
 			// Act + Assert:
 			expect(() => arrayHelpers.readVariableSizeElements(context.subView, context.factory, 4))

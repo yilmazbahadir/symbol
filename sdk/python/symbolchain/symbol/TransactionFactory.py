@@ -46,6 +46,12 @@ class TransactionFactory:
 			'network': self.network.identifier
 		})
 
+	def create_receipt(self, receipt_descriptor):
+		"""Creates a receipt from a descriptor."""
+		return self.factory.create_from_factory(sc.ReceiptFactory.create_by_name, {
+			**receipt_descriptor
+		})
+
 	@staticmethod
 	def attach_signature(transaction, signature):
 		"""Attaches a signature to a transaction."""
@@ -69,6 +75,7 @@ class TransactionFactory:
 		factory.autodetect()
 
 		struct_names = [
+			'Mosaic',
 			'UnresolvedMosaic',
 			'VrfProof'
 		]

@@ -73,6 +73,11 @@ class SymbolHelper:
 
 		return self.facade.transaction_factory.create_block(descriptor), printable_descriptor
 
+	def create_receipt(self, test_name, original_descriptor):
+		del test_name
+		descriptor = clone_descriptor(original_descriptor)
+		return self.facade.transaction_factory.create_receipt(descriptor), descriptor
+
 	def create(self, test_name, original_descriptor):
 		descriptor = clone_descriptor(original_descriptor)
 		self.set_common_transaction_fields(descriptor, test_name)
@@ -222,6 +227,12 @@ class VectorGenerator:
 
 		return test_cases
 
+	def create_blocks(self, module_name, recipes):
+		return self.create_objects(recipes, f'{module_name}_block', self.helper.create_block)
+
+	def create_receipts(self, module_name, recipes):
+		return self.create_objects(recipes, f'{module_name}_receipt', self.helper.create_receipt)
+
 	def create_transactions(self, module_name, recipes):
 		test_cases = self.create_objects(recipes, f'{module_name}_single', self.helper.create)
 
@@ -239,9 +250,6 @@ class VectorGenerator:
 
 	def create_aggregate_transactions(self, module_name, recipes):
 		return self.create_objects(recipes, f'{module_name}_aggregate', self.helper.create_aggregate)
-
-	def create_blocks(self, module_name, recipes):
-		return self.create_objects(recipes, f'{module_name}_block', self.helper.create_block)
 
 	def generate_transactions(self):
 		entries = []
@@ -266,6 +274,20 @@ class VectorGenerator:
 
 			recipes = getattr(module_descriptor[1], 'block_recipes')
 			entries.extend(self.create_blocks(module_descriptor[0], recipes))
+
+			print(f'[+] module {self.network_name}.{module_descriptor[0]}: ok')
+
+		return entries
+
+	def generate_others(self):
+		entries = []
+		for module_descriptor in self.modules:
+			if not hasattr(module_descriptor[1], 'receipt_recipes_array'):
+				continue
+
+			recipes_array = getattr(module_descriptor[1], 'receipt_recipes_array')
+			for recipes in recipes_array:
+				entries.extend(self.create_receipts(module_descriptor[0], recipes))
 
 			print(f'[+] module {self.network_name}.{module_descriptor[0]}: ok')
 
@@ -300,6 +322,9 @@ def main():
 
 		filepath = Path(args.output) / network_name / 'transactions' / 'blocks.yaml'
 		dump_to_file(generator.generate_blocks(), filepath)
+
+		filepath = Path(args.output) / network_name / 'transactions' / 'others.yaml'
+		dump_to_file(generator.generate_others(), filepath)
 
 
 if '__main__' == __name__:

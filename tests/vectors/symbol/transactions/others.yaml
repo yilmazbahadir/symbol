@@ -1,0 +1,47 @@
+# This file has been generated via py testvector generator.
+# DO NOT HAND MODIFY
+
+- descriptor:
+    mosaic:
+      amount: 273
+      mosaic_id: 1311768467294899695
+    target_address: TCIFSMQZAX3IDPHUP2RTXP26N6BJRNKEBBKP33I
+    type: harvest_fee_receipt
+  payload: 3000000000004321EFCDAB90785634121101000000000000989059321905F681BCF47EA33BBF5E6F8298B5440854FDED
+  schema_name: HarvestFeeReceipt
+  test_name: HarvestFeeReceipt_receipts_receipt_1
+- descriptor:
+    mosaic:
+      amount: 546
+      mosaic_id: 2541551403008843505
+    type: inflation_receipt
+  payload: 1800000000004351F1DEBC0A896745232202000000000000
+  schema_name: InflationReceipt
+  test_name: InflationReceipt_receipts_receipt_1
+- descriptor:
+    mosaic:
+      amount: 819
+      mosaic_id: 3771334300722392850
+    target_address: TCIFSMQZAX3IDPHUP2RTXP26N6BJRNKEBBKP33I
+    type: lock_hash_created_fee_receipt
+  payload: 300000000000483112EFCDAB907856343303000000000000989059321905F681BCF47EA33BBF5E6F8298B5440854FDED
+  schema_name: LockHashCreatedFeeReceipt
+  test_name: LockHashCreatedFeeReceipt_receipts_receipt_1
+- descriptor:
+    mosaic:
+      amount: 1092
+      mosaic_id: 5001116590429630755
+    target_address: TCIFSMQZAX3IDPHUP2RTXP26N6BJRNKEBBKP33I
+    type: lock_hash_completed_fee_receipt
+  payload: 300000000000482223F1DEBC0A8967454404000000000000989059321905F681BCF47EA33BBF5E6F8298B5440854FDED
+  schema_name: LockHashCompletedFeeReceipt
+  test_name: LockHashCompletedFeeReceipt_receipts_receipt_1
+- descriptor:
+    mosaic:
+      amount: 1365
+      mosaic_id: 6230889152035885620
+    target_address: TCIFSMQZAX3IDPHUP2RTXP26N6BJRNKEBBKP33I
+    type: lock_hash_expired_fee_receipt
+  payload: 30000000000048233412EFCDAB9078565505000000000000989059321905F681BCF47EA33BBF5E6F8298B5440854FDED
+  schema_name: LockHashExpiredFeeReceipt
+  test_name: LockHashExpiredFeeReceipt_receipts_receipt_1
